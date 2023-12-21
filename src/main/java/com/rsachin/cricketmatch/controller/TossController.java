@@ -9,11 +9,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class TossController {
     @PostMapping("/match/{matchId}/start-toss")
-    public String startToss(@PathVariable String matchId){
-        return "TOSS STARTED";
+    public TossDetails startToss(@PathVariable String matchId){
+        return null;
     }
     @GetMapping("/matches/{matchId}/toss-details")
     public TossDetails getTossDetails(@PathVariable String matchId){
-
+        return null;
     }
 }
