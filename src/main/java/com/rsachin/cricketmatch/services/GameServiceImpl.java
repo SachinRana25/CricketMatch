@@ -84,9 +84,11 @@ public class GameServiceImpl implements GameService{
             if(score2>score1)break;
             int currBowlNum = Constants.MATCH_OVERS*6-bowls+1; // This is required in scoreboard
             Player batsman = batsmen.get(currBatsmanIndex);
-            Player bowler = bowlers.get(Utils.pickRandom(0,bowlers.size()));
+            Player bowler = bowlers.get(Utils.pickRandom(0,bowlers.size()-1));
             PlayerStats batsman_stats = batsman.getStats();
+            if(batsman_stats==null)batsman_stats=new PlayerStats();
             PlayerStats bowler_stats = bowler.getStats();
+            if(bowler_stats==null)bowler_stats=new PlayerStats();
             bowler_stats.setBallsThrown(bowler_stats.getBallsThrown()+1);
             int run = Utils.pickRandom(0,7); // 7 is Wicket
             System.out.println("Run scored for bowl number "+currBowlNum+" = "+(run==7?"W":run));
@@ -104,7 +106,8 @@ public class GameServiceImpl implements GameService{
                 batsman_stats.setBallsFaced(batsman_stats.getBallsFaced()+1);
                 bowler_stats.setRunsGiven(bowler_stats.getRunsGiven()+run);
             }
-
+            batsman.setStats(batsman_stats);
+            bowler.setStats(bowler_stats);
             playerRepository.save(batsman);
             playerRepository.save(bowler);
             bowls--;
