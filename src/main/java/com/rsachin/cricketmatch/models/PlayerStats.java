@@ -9,5 +9,5 @@ public class PlayerStats {
     private int wickets=0;
     private int ballsFaced=0;
     private int runsGiven=0;
-
+    private int ballsThrown=0;
 }
