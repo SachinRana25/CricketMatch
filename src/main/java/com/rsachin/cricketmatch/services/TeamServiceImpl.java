@@ -29,6 +29,8 @@ public class TeamServiceImpl implements TeamService{
 
         Team teamA=new Team();
         Team teamB =new Team();
+        teamA.setTeamName("TEAM A");
+        teamB.setTeamName("TEAM B");
         for (int i = 0; i < batsmen.size() ; i++) {
             if(i<=batsmen.size()/2){
                 teamA.getPlayers().add(batsmen.get(i));
