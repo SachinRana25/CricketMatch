@@ -4,8 +4,10 @@ import com.rsachin.cricketmatch.configurations.Constants;
 import com.rsachin.cricketmatch.exceptions.InvalidGameException;
 import com.rsachin.cricketmatch.models.*;
 import com.rsachin.cricketmatch.repository.MatchRepository;
+import com.rsachin.cricketmatch.repository.PlayerRepository;
 import com.rsachin.cricketmatch.repository.TeamRepository;
 import com.rsachin.cricketmatch.repository.TossRepository;
+import com.rsachin.cricketmatch.utility.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,9 +23,12 @@ public class GameServiceImpl implements GameService{
     private TossRepository tossRepository;
     @Autowired
     private TeamRepository teamRepository;
+    @Autowired
+    private PlayerRepository playerRepository;
 
     private int score1=0,score2=0;
     private Team teamA=null,teamB=null;
+    private boolean firstTeamPlayed=false;
     @Override
     public String startPlayingGame(String matchId) {
         // fetch the teams for this matchId
@@ -46,6 +51,7 @@ public class GameServiceImpl implements GameService{
                 }else return "No Team with this TeamId exists "+td.getTeamWhoWillBowl();
                 try {
                     playGame(teamA,teamB);
+                    firstTeamPlayed=true;
                 } catch (InvalidGameException e) {
                     throw new RuntimeException(e);
                 }
@@ -59,7 +65,7 @@ public class GameServiceImpl implements GameService{
             }else{
                 return Constants.INVALID_TOSS;
             }
-            return null;
+            return score2>score1?"Team B Wins":"Team A Wins";
         }
         return Constants.INVALID_MATCHID;
     }
@@ -71,7 +77,37 @@ public class GameServiceImpl implements GameService{
         List<Player> bowlers = bowlingTeam.getPlayers().stream().filter(p->p.getRole().equals(PlayerType.BOWLER)).collect(Collectors.toList());
 
         int bowls = Constants.MATCH_OVERS*6;
-
+        int currBatsmanIndex=0;
         // TODO : iterate number of bowls and call random functions until bowls==0 OR score2 reaches score1 OR wickets==batsmen.size()
+        while(bowls>=1){
+            if(currBatsmanIndex>=batsmen.size())break;
+            if(score2>score1)break;
+            int currBowlNum = Constants.MATCH_OVERS*6-bowls+1; // This is required in scoreboard
+            Player batsman = batsmen.get(currBatsmanIndex);
+            Player bowler = bowlers.get(Utils.pickRandom(0,bowlers.size()));
+            PlayerStats batsman_stats = batsman.getStats();
+            PlayerStats bowler_stats = bowler.getStats();
+            bowler_stats.setBallsThrown(bowler_stats.getBallsThrown()+1);
+            int run = Utils.pickRandom(0,7); // 7 is Wicket
+            System.out.println("Run scored for bowl number "+currBowlNum+" = "+(run==7?"W":run));
+            if(run==7){
+                bowler_stats.setWickets(bowler_stats.getWickets()+1);
+                batsman_stats.setBallsFaced(batsman_stats.getBallsFaced()+1);
+                currBatsmanIndex++;
+            }else{
+                if(!firstTeamPlayed){
+                    score1+=run;
+                }else{
+                    score2+=run;
+                }
+                batsman_stats.setScore(batsman_stats.getScore()+run);
+                batsman_stats.setBallsFaced(batsman_stats.getBallsFaced()+1);
+                bowler_stats.setRunsGiven(bowler_stats.getRunsGiven()+run);
+            }
+
+            playerRepository.save(batsman);
+            playerRepository.save(bowler);
+            bowls--;
+        }
     }
 }
