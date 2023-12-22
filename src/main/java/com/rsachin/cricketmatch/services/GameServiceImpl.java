@@ -59,7 +59,7 @@ public class GameServiceImpl implements GameService{
             }else{
                 return Constants.INVALID_TOSS;
             }
-            return null;
+            return score2>score1?"Team B Wins":"Team A Wins";
         }
         return Constants.INVALID_MATCHID;
     }
@@ -71,7 +71,14 @@ public class GameServiceImpl implements GameService{
         List<Player> bowlers = bowlingTeam.getPlayers().stream().filter(p->p.getRole().equals(PlayerType.BOWLER)).collect(Collectors.toList());
 
         int bowls = Constants.MATCH_OVERS*6;
-
+        int currBatsman=0;
         // TODO : iterate number of bowls and call random functions until bowls==0 OR score2 reaches score1 OR wickets==batsmen.size()
+        while(bowls>=1){
+            if(currBatsman>=batsmen.size())break;
+            if(score2>score1)break;
+            int currBowlNum = Constants.MATCH_OVERS*6-bowls+1;
+            
+            bowls--;
+        }
     }
 }
